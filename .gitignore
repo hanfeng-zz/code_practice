@@ -1,3 +1,2 @@
-basic_practice/cmake-*
-
-basic_practice/.*
+cmake-*
+.*
