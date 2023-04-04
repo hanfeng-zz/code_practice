@@ -7,3 +7,5 @@ add_executable(basic_practice main.cpp)
 
 
 add_executable(const_pointer  constPointer.h constPointer.cpp)
+
+add_executable(INLINE  INLINE.h INLINE.cpp)

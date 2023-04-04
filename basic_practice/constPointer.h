@@ -7,7 +7,9 @@
 
 
 class constPointer {
-
+private:
+    const int size;
+    explicit constPointer(int x) : size(x) {};
 };
 
 
