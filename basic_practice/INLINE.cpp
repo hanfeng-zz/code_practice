@@ -9,6 +9,5 @@ int main() {
 
     std::cout << instance.getSize() << std::endl;
 
-    std::cout << "test";
     return 1;
 }
