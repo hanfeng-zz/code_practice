@@ -6,3 +6,5 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(byteOrder byteOrder.cpp)
 add_executable(union union.cpp)
+
+add_executable(raw raw.cpp raw.h)

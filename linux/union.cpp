@@ -4,6 +4,7 @@
 
 #define PACKED __attribute__((packed))
 #include <iostream>
+#include <cstring>
 typedef	int       Boolean;
 typedef uint8_t   Enumeration8;
 typedef uint16_t  Enumeration16;
