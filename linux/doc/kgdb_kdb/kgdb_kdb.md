@@ -63,7 +63,13 @@
     (2) 使能kgdb，命令如下，成功提示【KGDB: KGDB or $3#33 for KDB】
         - echo g > /proc/sysrq-trigger
 
-2、crosstools gdb连接
+2、开启agen-proxy
+    
+    sudo ./agent-proxy 5550^5551 0 /dev/ttyUSB0,115200
+
+    telnet localhost 5550 (访问端口22)
+
+3、crosstools gdb连接
     
     需要使用交叉编译工具链的gdb工具，和编译kernel的vmlinux可执行程序
     - sudo PYTHONHOME=/usr/lib/python3.8/ PYTHONPATH=/usr/lib/python3.8/ ~/linux/shifei/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-gdb ./vmlinux
