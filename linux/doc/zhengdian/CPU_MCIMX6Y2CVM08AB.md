@@ -16,9 +16,18 @@ at 2.5/25 MHz.
 • a 2-bit Reduced MII (RMII) operating at 50 MHz
 >
 
+# MII、GMII、XGMII
+
+![MII](./pictures/MII.png)
+
+![GMII](./pictures/GMII.png)
+
+![XGMII](./pictures/XGMII.png)
 
 # CPU 中断
-    
+
+[参考](https://www.codenong.com/27709349/)
+
 ## 问题
 1. Simple 64-Bit FIFO user-application interface        
     这个是不是UIO中的中断内容
@@ -34,4 +43,5 @@ at 2.5/25 MHz.
 1. 工业级和商业级的区别     
    温度上的区别，工业级更稳定，适应的温度范围更广。
 
-2. 
+2. 什么是phy?       
+   port physical layer，端口物理层；以太网phy指的是一个芯片，用于传输以太网数据帧，但其没有MAC，只拥有和data link layer 中 MAC 通信的功能
