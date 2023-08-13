@@ -11,7 +11,7 @@
    setting --> SSH and GPG keys --> new SSH key --> 自定义key 名，并将u_kernel_649.pub文件内容拷贝到key中
 
 5. 配置.ssh config文件
-   1. touch config 
+   1. touch config & chmod a+x config
    2. 增加如下  
     >Host kernel649
         HostName github.com
