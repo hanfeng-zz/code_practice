@@ -47,6 +47,8 @@ CONFIG_INITRAMFS_COMPRESSION_GZIP=y
 # 参考 & 简述 
 - [Early userspace support](https://github.com/torvalds/linux/blob/master/Documentation/driver-api/early-userspace/early_userspace_support.rst)
     - 简述: 当前内核有3中挂在文件系统方式,initramfs是其中一种,文件格式是cpio压缩格式,通过/init文件引导
-- [主要参考连接-1](http://trac.gateworks.com/wiki/buildroot)
-- [主要参考链接-2](http://trac.gateworks.com/wiki/linux/initramfs)
-- [次要参考连接](https://blog.51cto.com/u_15127585/4384962)
+- [主-1](http://trac.gateworks.com/wiki/buildroot)
+- [主-2](http://trac.gateworks.com/wiki/linux/initramfs)
+- [次-1](https://blog.51cto.com/u_15127585/4384962)
+- [次-1](https://www.landley.net/writing/rootfs-intro.html)
+- [次-2](https://www.landley.net/writing/rootfs-howto.html)
