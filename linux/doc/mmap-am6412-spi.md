@@ -68,6 +68,7 @@
     - SPI WORD LEN = 8BIT; 由于CPU的SPI接受寄存器是32BIT, 每次仅读取低8BIT数据即可,然后拼接成32BIT数据
     - 由于SPI SPEED = 20MHZ, PAD = 3; SPI写入长度应该是 7 + PAD;写入地址开头应该是0x80 + switch偏移地址; 
     - 只读只写需要将设置相应模式 
+    - 代码位置(https://github.com/hanfeng-zz/code_practice/tree/main/linux/code-test/am6412-spi-userspace)
 
 ## 参考
 
