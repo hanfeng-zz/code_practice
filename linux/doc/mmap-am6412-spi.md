@@ -75,11 +75,10 @@
 [kernel-mmap.rst](https://www.kernel.org/doc/html/v4.14/media/uapi/v4l/mmap.html?highlight=mmap)    
 [mmap-1](https://www.cnblogs.com/wanghuaijun/p/7624564.html)    
 [mmap-2](https://zhuanlan.zhihu.com/p/640169233)    
-[kernel-mmap-desc](https://www.man7.org/linux/man-pages/man2/mmap.2.html)
-[reference-code](https://blog.csdn.net/qq_36373500/article/details/72961711)
-[uio](https://www.kernel.org/doc/html/v4.14/driver-api/uio-howto.html?highlight=mmap)
-[1](https://stackoverflow.com/questions/45972/mmap-vs-reading-blocks)
-[2](https://patchwork.kernel.org/project/spi-devel-general/patch/1447133399-25658-2-git-send-email-vigneshr@ti.com/)
-[3](https://blog.csdn.net/u010034969/article/details/115111444?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-115111444-blog-129405883.235^v38^pc_relevant_anti_vip&spm=1001.2101.3001.4242.1&utm_relevant_index=3)
-[]
+[kernel-mmap-desc](https://www.man7.org/linux/man-pages/man2/mmap.2.html)   
+[reference-code](https://blog.csdn.net/qq_36373500/article/details/72961711)    
+[uio](https://www.kernel.org/doc/html/v4.14/driver-api/uio-howto.html?highlight=mmap)   
+[1](https://stackoverflow.com/questions/45972/mmap-vs-reading-blocks)   
+[2](https://patchwork.kernel.org/project/spi-devel-general/patch/1447133399-25658-2-git-send-email-vigneshr@ti.com/)    
+[3](https://blog.csdn.net/u010034969/article/details/115111444?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-115111444-blog-129405883.235^v38^pc_relevant_anti_vip&spm=1001.2101.3001.4242.1&utm_relevant_index=3)  
 
