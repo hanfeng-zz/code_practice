@@ -26,7 +26,10 @@ int timerfd_gettime(int fd, struct itimerspec *curr_value);
 - timerfd_settime
   - new_value.it_value非0启动定时器，0关闭定时器；new_value.it_interval超时周期
   - flags:
+  - old_value:NULL表示当前的时间开始计时，
+<mark>todo
 
-
-[open](https://man7.org/linux/man-pages/man2/open.2.html)
-[time_create](https://man7.org/linux/man-pages/man2/timerfd_create.2.html)
+# 参考
+[open](https://man7.org/linux/man-pages/man2/open.2.html)   
+[time_create](https://man7.org/linux/man-pages/man2/timerfd_create.2.html)  
+[time_settime](https://man7.org/linux/man-pages/man2/timer_settime.2.html)  
