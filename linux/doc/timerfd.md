@@ -25,8 +25,8 @@ int timerfd_gettime(int fd, struct itimerspec *curr_value);
       - TFD_CLOEXEC:多线程使用
 - timerfd_settime
   - new_value.it_value非0启动定时器，0关闭定时器；new_value.it_interval超时周期
-  - flags:
-  - old_value:NULL表示当前的时间开始计时，
+  - flags:0表示相对时间（软件 timer_id运行当前时间 + 启动时间new_value）,TFD_TIMER_ABSTIME 绝对时间，由设置的new_value值决定。
+  - old_value:一般填写NULL，<mark>非NULL没研究过，没想道对应的应用场景</mark>
 
 - 练习
   - 1s定时
@@ -47,7 +47,8 @@ int main(int argc, char *argv[]) {
 
     struct itimerspec tmo = {
             {1, 0},// 1s 定时
-            {1, 0} //需要设置一个其实时间，全为0定时器不会启动
+            {1, 0} //需要设置一个起始时间，全为0定时器不会启动，timerfd_settime第二个参数
+                    // 设置0时，该时间是基于 当前时间 + tmo.it_value 启动的
     };
 
     int vsc_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
@@ -101,8 +102,217 @@ int main(int argc, char *argv[]) {
 }
 
 ``````
+  - 指定未来某一时刻启动1s定时
+    - 方式1：相对时间启动
+    - 方式2: 绝对时间启动
+``````C
+#include <sys/timerfd.h>
+#include <iostream>
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/poll.h>
+#include <cassert>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <thread>
+// 相对
+int main(int argc, char *argv[]) {
+
+    struct itimerspec tmo = {
+            {1, 0},// 1s 定时
+            {10, 0} //需要设置一个起始时间，全为0定时器不会启动,timerfd_settime第二个参数
+                    // 设置0时，该时间是基于 当前时间 + tmo.it_value 启动的
+    };
+
+    int vsc_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    if (vsc_fd < 0) {
+        printf("[%s][%d] timerfd_create errno:%d\n", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+
+    struct timespec startTime{};
+    clock_gettime(CLOCK_MONOTONIC, &startTime);
+    printf("startTime: %ld.%09ld \n", startTime.tv_sec, startTime.tv_nsec);
+
+    if (timerfd_settime(vsc_fd, 0, &tmo, NULL) < 0) {
+        printf("[%s][%d] vsc timerfd_settime errno:%d", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+    struct pollfd fd = {vsc_fd, POLLIN, 0};
+    char times[sizeof(uint64_t)];
+    while (true) {
+        int ret = poll(&fd, 1, -1);
+        if (ret < 0) {
+            printf("[%s][%d] poll errno:%d\n", __FUNCTION__, __LINE__, errno);
+        } else {
+            ret = read(fd.fd, times, sizeof(uint64_t));
+            if (ret < 0) {
+                printf("[%s][%d] read errno:%d\n", __FUNCTION__, __LINE__, errno);
+            } else {
+                struct timespec curTime{};
+                clock_gettime(CLOCK_MONOTONIC, &curTime);
+                printf("curTime: %ld.%09ld times:%ld\n", curTime.tv_sec, curTime.tv_nsec, *((uint64_t *)times));
+            }
+        }
+    }
+    return 1;
+}
+``````
+``````C
+#include <sys/timerfd.h>
+#include <iostream>
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/poll.h>
+#include <cassert>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <thread>
+//绝对
+int main(int argc, char *argv[]) {
+
+    struct itimerspec tmo = {
+            {1, 0},// 1s 定时
+            {1, 0} //需要设置一个起始时间，全为0定时器不会启动
+    };
+
+    int vsc_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    if (vsc_fd < 0) {
+        printf("[%s][%d] timerfd_create errno:%d\n", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+
+    struct timespec startTime{};
+    clock_gettime(CLOCK_MONOTONIC, &startTime);
+    printf("startTime: %ld.%09ld \n", startTime.tv_sec, startTime.tv_nsec);
+    tmo.it_value = startTime ;
+    tmo.it_value.tv_sec += 10;
+
+    if (timerfd_settime(vsc_fd, TFD_TIMER_ABSTIME, &tmo, NULL) < 0) {
+        printf("[%s][%d] vsc timerfd_settime errno:%d", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+    struct pollfd fd = {vsc_fd, POLLIN, 0};
+    char times[sizeof(uint64_t)];
+    while (true) {
+        int ret = poll(&fd, 1, -1);
+        if (ret < 0) {
+            printf("[%s][%d] poll errno:%d\n", __FUNCTION__, __LINE__, errno);
+        } else {
+            //两种方式触发定时
+            //微妙级定时器
+#if 1
+            //方式1，读取过期数
+            //不读取会一直有事件上报上来
+            ret = read(fd.fd, times, sizeof(uint64_t));
+            if (ret < 0) {
+                printf("[%s][%d] read errno:%d\n", __FUNCTION__, __LINE__, errno);
+            } else {
+                struct timespec curTime{};
+                clock_gettime(CLOCK_MONOTONIC, &curTime);
+                printf("curTime: %ld.%09ld times:%ld\n", curTime.tv_sec, curTime.tv_nsec, *((uint64_t *)times));
+            }
+#elif 0
+            //方式2，重新设置
+            if (timerfd_settime(vsc_fd, 0, &tmo, NULL) < 0) {
+                printf("[%s][%d] vsc timerfd_settime errno:%d", __FUNCTION__, __LINE__, errno);
+                return -1;
+            }
+            struct timespec curTime{};
+            clock_gettime(CLOCK_MONOTONIC, &curTime);
+            printf("curTime: %ld.%09ld \n", curTime.tv_sec, curTime.tv_nsec);
+
+#endif
+
+        }
+    }
 
 
+    return 1;
+}
+``````
+
+
+  - 只启动一次
+``````C
+#include <sys/timerfd.h>
+#include <iostream>
+#include <stdio.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <sys/poll.h>
+#include <cassert>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <thread>
+int main(int argc, char *argv[]) {
+
+    struct itimerspec tmo = {
+            {0, 0},// 全为0，表示只启动一次
+            {1, 0} //需要设置一个起始时间，全为0定时器不会启动
+    };
+
+    int vsc_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+    if (vsc_fd < 0) {
+        printf("[%s][%d] timerfd_create errno:%d\n", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+
+    struct timespec startTime{};
+    clock_gettime(CLOCK_MONOTONIC, &startTime);
+    printf("startTime: %ld.%09ld \n", startTime.tv_sec, startTime.tv_nsec);
+
+    if (timerfd_settime(vsc_fd, 0, &tmo, NULL) < 0) {
+        printf("[%s][%d] vsc timerfd_settime errno:%d", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+    struct pollfd fd = {vsc_fd, POLLIN, 0};
+    char times[sizeof(uint64_t)];
+    while (true) {
+        int ret = poll(&fd, 1, -1);
+        if (ret < 0) {
+            printf("[%s][%d] poll errno:%d\n", __FUNCTION__, __LINE__, errno);
+        } else {
+            //两种方式触发定时
+            //微妙级定时器
+#if 1
+            //方式1，读取过期数
+            //不读取会一直有事件上报上来
+            ret = read(fd.fd, times, sizeof(uint64_t));
+            if (ret < 0) {
+                printf("[%s][%d] read errno:%d\n", __FUNCTION__, __LINE__, errno);
+            } else {
+                struct timespec curTime{};
+                clock_gettime(CLOCK_MONOTONIC, &curTime);
+                printf("curTime: %ld.%09ld times:%ld\n", curTime.tv_sec, curTime.tv_nsec, *((uint64_t *)times));
+            }
+#elif 0
+            //方式2，重新设置
+            if (timerfd_settime(vsc_fd, 0, &tmo, NULL) < 0) {
+                printf("[%s][%d] vsc timerfd_settime errno:%d", __FUNCTION__, __LINE__, errno);
+                return -1;
+            }
+            struct timespec curTime{};
+            clock_gettime(CLOCK_MONOTONIC, &curTime);
+            printf("curTime: %ld.%09ld \n", curTime.tv_sec, curTime.tv_nsec);
+
+#endif
+
+        }
+    }
+
+
+    return 1;
+}
+``````
 
 # 参考
 [open](https://man7.org/linux/man-pages/man2/open.2.html)   
