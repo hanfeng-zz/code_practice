@@ -13,9 +13,12 @@
 - 命令创建  
     - mkfifo [-m mode ] pathname #默认可读可写    
     - mknod pathname p
+  
 - 程序创建  
   <mark> mkfifoat 未研究</mark>
-  ``````C
+
+  ``````C   
+
         #include <sys/types.h>
         #include <sys/stat.h>
 
@@ -26,40 +29,47 @@
         #include <sys/stat.h>
 
         int mkfifoat(int dirfd, const char *pathname, mode_t mode);
+
   ``````
 
 ## 能力描述
 - 没有字节流概念（需要注意读取的起始位置是否符合需求）
 - 设备上PIPE可使用的内存大小查询
-  ``````C
+  
+  ``````C 
+
   # ls -l /proc/sys/fs/ | grep pipe
     -rw-r--r--    1 root     root             0 Nov 24 17:08 pipe-max-size
     -rw-r--r--    1 root     root             0 Nov 24 17:08 pipe-user-pages-hard
     -rw-r--r--    1 root     root             0 Nov 24 17:08 pipe-user-pages-soft
+
   ``````
 
 - 多进程有名管道打开方式:<mark>使用非阻塞模式</mark>
   ``````C
 
   1.创建FIFO * 2，别名FIFO1，FIFO2，两个进程对该FIFOx仅读或者写
-  //进程1 
+  //进程1
   2. 非阻塞只读打开FIFO1
-    open(FIFO1, O_RDONLY | O_NONBLOCK)；
-  5. 收到连接标志，只写打开FIFO2 
-    open(FIFO1, O_WRONLY | O_NONBLOCK); 
+  open(FIFO1, O_RDONLY | O_NONBLOCK);
+  5. 收到连接标志，只写打开FIFO2;
+  open(FIFO1, O_WRONLY | O_NONBLOCK);
   //进程2
   3. 非阻塞只写打开FIFO1，只读打开FIFO2
-    open(FIFO1, O_WRONLY | O_NONBLOCK);
-    open(FIFO2, O_RDONLY | O_NONBLOCK)；
+  open(FIFO1, O_WRONLY | O_NONBLOCK);
+  open(FIFO2, O_RDONLY | O_NONBLOCK);
   4. 发送已连接标志，使用write写FIFO1
+  6.创建FIFO3来使进程1知晓进程2存活，write方式，失败会产生EPIPE和SIGPIPE信号量  
+  ``````  
 
-  7.创建FIFO3来使进程1知晓进程2存活，write方式，失败会产生EPIPE和SIGPIPE信号量
-  ``````
 - 管道长度获取和设置
-  ``````C
+
+  ``````C   
+
   //管道长度可通过fcntl来查询
   fcntl(fifo_fd, F_GETPIPE_SZ); //查询
   F_SETPIPE_SZ //设置
+
   ``````
 
 - 管道相关问题及解决
@@ -73,6 +83,8 @@
   - SIGPIPE 抑制可以将FIFO设置为O_RDWR，但是这个不能用于进程间通讯，只能人工忽略处理SIGPIPE信号量
   - EPIPE 仅由write失败产生
   - 使用pthread_sigmask 处理write失败产生的SIGPIPE
+  
+
 # 参考
 
 [mkfifo_1](https://man7.org/linux/man-pages/man1/mkfifo.1.html)     
