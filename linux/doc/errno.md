@@ -1,0 +1,2 @@
+- 14: bad address 
+    - read函数，buf参数为空指针
