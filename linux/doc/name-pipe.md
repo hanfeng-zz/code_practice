@@ -73,10 +73,13 @@
   ``````
 
 - 管道相关问题及解决
-  - 读取失败：EAGAIN
+  - 读取失败：EAGAIN    
     无需处理，等待下一次数据
-  - 写失败：EPIPE
+  - 写失败：EPIPE   
     EPIPE表示读取端已经断开，写入端忽略EPIPE错误，同时需要处理SIGPIPE信号量（忽略），不然进程退出
+  - 类似POLL方式，写端FD关闭，会提示POLLHUP    
+    读端重新打开该FD
+  - 写端断开，不需要重新打开，等待读端重新连接即可
 
 - 其它
   - SIGPIPE 也会由socket send产生，可以设置SO_NoSIGPIPE（BSD）或者MSG_NOSIGNAL（Linux）清除
